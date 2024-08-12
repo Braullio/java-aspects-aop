@@ -25,8 +25,6 @@ public class Pessoa {
     @Override
     public String toString() {
         Gson gson = new Gson();
-        String head = "Pessoa(hashCode: " + hashCode() + ") ";
-        String json = gson.toJson(this);
-        return head + json;
+        return gson.toJson(this);
     }
 }

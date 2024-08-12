@@ -6,64 +6,48 @@ import java.time.format.DateTimeFormatter;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Pointcut;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 @Aspect
 @Component
 public class LoggingServicesAspect {
 
-    private static final String LINE_SEPARATOR = "-------------------------------------------------------------------------------------------------------------------------";
+    private static final Logger logger = LoggerFactory.getLogger(LoggingServicesAspect.class);
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
 
-    // @Before("execution(* br.com.braullio.java_aspects_aop.services..*(..))")
-    // public void logBefore(JoinPoint jp) {
-    //     StringBuilder log = new StringBuilder();
+    @Pointcut("execution(* br.com.braullio.java_aspects_aop.services.SenderService.email(..))")
+    public void serviceLayer() {}
 
-    //     log.append(LINE_SEPARATOR).append("\n")
-    //         .append("Start : ").append(jp.getSignature()).append("\n")
-    //         .append("Timestamp: ").append(LocalDateTime.now().format(DATE_TIME_FORMATTER)).append("\n");
-
-    //     Object[] args = jp.getArgs();
-    //     if (args.length > 0) {
-    //         log.append("Params: ").append("\n");
-
-    //         for (Object arg : args) {
-    //             log.append("- ").append(arg != null ? arg : "null");
-    //         }
-    //     } else {
-    //         log.append("Parameters Value: None\n");
-    //     }
-
-    //     log.append("\n").append(LINE_SEPARATOR);
-    //     System.out.println(log);
-    // }
-
-    @AfterReturning(pointcut = "execution(* br.com.braullio.java_aspects_aop.services..*(..))", returning = "result")
+    @AfterReturning(pointcut = "serviceLayer()", returning = "result")
     public void logAfterReturning(JoinPoint jp, Object result) {
-        StringBuilder log = new StringBuilder();
+       // Cria um StringBuilder para o log JSON
+       StringBuilder log = new StringBuilder();
+       log.append("{");
 
-        log.append(LINE_SEPARATOR).append("\n")
-            .append("Execution: ").append(jp.getSignature()).append("\n")
-            .append("Timestamp: ").append(LocalDateTime.now().format(DATE_TIME_FORMATTER)).append("\n");
+       log.append("\"timestamp\": \"").append(LocalDateTime.now().format(DATE_TIME_FORMATTER)).append("\", ");
 
-        Object[] args = jp.getArgs();
-        if (args.length > 0) {
-            log.append("Params: ").append("\n");
+       String sig = jp.getSignature().toString();
+       String[] parts = sig.split(" ", 2);
+       String returnType = parts[0];
+       String methodAndParams = parts.length > 1 ? parts[1] : "";
 
-            for (Object arg : args) {
-                log.append("- ").append(arg != null ? arg : "null");
-            }
-        } else {
-            log.append("Parameters Value: None\n");
-        }
+       log.append("\"method\": \"").append(methodAndParams).append("\", ");
 
-        if (result != null) {
-            log.append("\nReturn: ").append(result).append("\n");
-        } else {
-            log.append("\nReturn: None\n");
-        }
+       Object[] args = jp.getArgs();
+       if (args.length > 0) {
+           log.append("\"pessoa\": ");
+           log.append(args[0] != null ? args[0].toString() : "null");
+           log.append(", ");
+       }
 
-        log.append(LINE_SEPARATOR);
-        System.out.println(log);
-    }
+       log.append("\"responseType\": \"").append(returnType).append("\", ");
+       log.append("\"response\": \"").append(result != null ? result.toString() : "None").append("\"");
+
+       log.append("}");
+
+       logger.info(log.toString());
+   }
 }

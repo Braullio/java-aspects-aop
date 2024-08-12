@@ -18,16 +18,10 @@ public class JavaAspectsAopApplication {
 	@Bean
 	ApplicationRunner runner(SenderService sending) {
         return args -> {
-            System.out.println("\nRunner is executing...");
-
             Pessoa pessoa = new Pessoa("João", "joao@email.com");
-
-			System.out.println("\nPessoa criada: " + pessoa + "\n");
-
             sending.email(pessoa);
             pessoa.emailSending();
-
-			System.out.println("\nPessoa após emailSending: " + pessoa + "\n");
+			sending.email(pessoa);
         };
 	}
 }
