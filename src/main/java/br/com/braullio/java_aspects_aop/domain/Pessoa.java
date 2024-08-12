@@ -25,15 +25,8 @@ public class Pessoa {
     @Override
     public String toString() {
         Gson gson = new Gson();
-        StringBuilder log = new StringBuilder();
-
         String head = "Pessoa(hashCode: " + hashCode() + ") ";
         String json = gson.toJson(this);
-
-        return log.append(head).append(json).toString();
-    }
-
-    public String getEmail() {
-        return this.email;
+        return head + json;
     }
 }
